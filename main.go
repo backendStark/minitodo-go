@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Task struct {
-	text string
-	done bool
+	Text string
+	Done bool
 }
 
 func main() {
@@ -20,7 +21,20 @@ func main() {
 
 	switch act {
 	case "add":
-		fmt.Println("Add task")
+		if len(os.Args) < 3 {
+			fmt.Println("You need to type task text")
+			return
+		}
+
+		text := strings.Join(os.Args[2:], " ")
+		trimmed := strings.TrimSpace(text)
+
+		if len(trimmed) == 0 {
+			fmt.Println("You type empty space, you need to input real task")
+			return
+		}
+
+		fmt.Println(trimmed)
 	case "list":
 		fmt.Println("Show list")
 	case "done":
