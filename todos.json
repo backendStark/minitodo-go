@@ -1,0 +1,10 @@
+[
+  {
+    "text": "Learn Go basics",
+    "done": false
+  },
+  {
+    "text": "Write a todo app",
+    "done": true
+  }
+]
