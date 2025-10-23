@@ -9,11 +9,11 @@ import (
 )
 
 type Task struct {
-	Text string
-	Done bool
+	Text string `json:"text"`
+	Done bool   `json:"done"`
 }
 
-var todosFilename string = "todos.json"
+const todosFilename = "todos.json"
 
 func loadTasks(filename string) ([]Task, error) {
 	if data, err := os.ReadFile(filename); err == nil {
@@ -47,10 +47,10 @@ func saveTasks(filename string, tasks []Task) error {
 	data, err := json.MarshalIndent(tasks, "", "  ")
 
 	if err != nil {
-		return fmt.Errorf("we cant serialize tasks for file %w", err)
+		return fmt.Errorf("we can't serialize tasks for file %w", err)
 	}
 
-	err = os.WriteFile(todosFilename, data, 0644)
+	err = os.WriteFile(filename, data, 0644)
 
 	if err != nil {
 		return fmt.Errorf("error writing to file: %w", err)
@@ -95,9 +95,9 @@ func main() {
 		}
 
 		tasks = append(tasks, newTask)
-	
-		if 	err := saveTasks(todosFilename, tasks); err != nil {
-			fmt.Println("We cant save the file with tasks")
+
+		if err := saveTasks(todosFilename, tasks); err != nil {
+			fmt.Println("We can't save the file with tasks")
 			return
 		}
 
