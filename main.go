@@ -37,6 +37,8 @@ func loadTasks(filename string) ([]Task, error) {
 
 		defer file.Close()
 
+		file.Write([]byte("[]"))
+
 		return []Task{}, nil
 	} else {
 		return nil, fmt.Errorf("file has errors %w", err)
@@ -47,7 +49,7 @@ func saveTasks(filename string, tasks []Task) error {
 	data, err := json.MarshalIndent(tasks, "", "  ")
 
 	if err != nil {
-		return fmt.Errorf("we can't serialize tasks for file %w", err)
+		return fmt.Errorf("cannot serialize tasks for file %w", err)
 	}
 
 	err = os.WriteFile(filename, data, 0644)
@@ -97,7 +99,7 @@ func main() {
 		tasks = append(tasks, newTask)
 
 		if err := saveTasks(todosFilename, tasks); err != nil {
-			fmt.Println("We can't save the file with tasks")
+			fmt.Println("Cannot save the file with tasks")
 			return
 		}
 
