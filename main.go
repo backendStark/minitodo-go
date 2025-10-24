@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -61,6 +62,18 @@ func saveTasks(filename string, tasks []Task) error {
 	return nil
 }
 
+func formatTask(task Task) string {
+	var done string
+
+	if !task.Done {
+		done = "[ ]"
+	} else {
+		done = "[X]"
+	}
+
+	return fmt.Sprintf("%s %s", done, task.Text)
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("If you want use program, you need to input arguments. Try again")
@@ -106,10 +119,35 @@ func main() {
 		fmt.Println("Added task:", trimmed)
 	case "list":
 		for i, task := range tasks {
-			fmt.Println(i+1, task.Text)
+			fmt.Printf("%d. %s\n", i+1, formatTask(task))
 		}
 	case "done":
-		fmt.Println("Make the task done")
+		if len(os.Args) < 3 {
+			fmt.Println("You need to type task number")
+			return
+		}
+
+		num, err := strconv.Atoi(os.Args[2])
+
+		if err != nil {
+			fmt.Println("Cannot to parse tasks number")
+			return
+		}
+
+		if num < 1 || num > len(tasks) {
+			fmt.Println("Invalid task number")
+			return
+		}
+
+		tasks[num-1].Done = true
+		doneText := fmt.Sprintf("You completed the task %d: %s", num, tasks[num-1].Text)
+
+		if err := saveTasks(todosFilename, tasks); err != nil {
+			fmt.Println("Cannot save the file with tasks")
+			return
+		}
+
+		fmt.Println(doneText)
 	default:
 		fmt.Println("Unknown command")
 	}
