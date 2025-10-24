@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -75,11 +76,6 @@ func formatTask(task Task) string {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("If you want use program, you need to input arguments. Try again")
-		return
-	}
-
 	tasks, err := loadTasks(todosFilename)
 
 	if err != nil {
@@ -87,68 +83,93 @@ func main() {
 		return
 	}
 
-	act := os.Args[1]
+	reader := bufio.NewReader(os.Stdin)
 
-	switch act {
-	case "add":
-		if len(os.Args) < 3 {
-			fmt.Println("You need to type task text")
-			return
-		}
+	for {
+		fmt.Print("> ")
 
-		text := strings.Join(os.Args[2:], " ")
-		trimmed := strings.TrimSpace(text)
-
-		if len(trimmed) == 0 {
-			fmt.Println("You type empty space, you need to input real task")
-			return
-		}
-
-		newTask := Task{
-			Text: trimmed,
-			Done: false,
-		}
-
-		tasks = append(tasks, newTask)
-
-		if err := saveTasks(todosFilename, tasks); err != nil {
-			fmt.Println("Cannot save the file with tasks")
-			return
-		}
-
-		fmt.Println("Added task:", trimmed)
-	case "list":
-		for i, task := range tasks {
-			fmt.Printf("%d. %s\n", i+1, formatTask(task))
-		}
-	case "done":
-		if len(os.Args) < 3 {
-			fmt.Println("You need to type task number")
-			return
-		}
-
-		num, err := strconv.Atoi(os.Args[2])
+		input, err := reader.ReadString('\n')
 
 		if err != nil {
-			fmt.Println("Cannot to parse tasks number")
+			fmt.Println("Error reading input:", err)
 			return
 		}
 
-		if num < 1 || num > len(tasks) {
-			fmt.Println("Invalid task number")
-			return
+		input = strings.TrimSpace(input)
+
+		if input == "quit" {
+			break
 		}
 
-		tasks[num-1].Done = true
-		doneText := fmt.Sprintf("You completed the task %d: %s", num, tasks[num-1].Text)
+		parts := strings.Fields(input)
 
-		if err := saveTasks(todosFilename, tasks); err != nil {
-			fmt.Println("Cannot save the file with tasks")
-			return
+		if len(parts) == 0 {
+			continue
 		}
 
-		fmt.Println(doneText)
-	default:
-		fmt.Println("Unknown command")
+		act := parts[0]
+
+		switch act {
+		case "add":
+			if len(parts) < 3 {
+				fmt.Println("You need to type task text")
+				return
+			}
+
+			text := strings.Join(parts[2:], " ")
+			trimmed := strings.TrimSpace(text)
+
+			if len(trimmed) == 0 {
+				fmt.Println("You type empty space, you need to input real task")
+				return
+			}
+
+			newTask := Task{
+				Text: trimmed,
+				Done: false,
+			}
+
+			tasks = append(tasks, newTask)
+
+			if err := saveTasks(todosFilename, tasks); err != nil {
+				fmt.Println("Cannot save the file with tasks")
+				return
+			}
+
+			fmt.Println("Added task:", trimmed)
+		case "list":
+			for i, task := range tasks {
+				fmt.Printf("%d. %s\n", i+1, formatTask(task))
+			}
+		case "done":
+			if len(parts) < 2 {
+				fmt.Println("You need to type task number")
+				return
+			}
+
+			num, err := strconv.Atoi(parts[1])
+
+			if err != nil {
+				fmt.Println("Cannot to parse tasks number")
+				return
+			}
+
+			if num < 1 || num > len(tasks) {
+				fmt.Println("Invalid task number")
+				return
+			}
+
+			tasks[num-1].Done = true
+			doneText := fmt.Sprintf("You completed the task %d: %s", num, tasks[num-1].Text)
+
+			if err := saveTasks(todosFilename, tasks); err != nil {
+				fmt.Println("Cannot save the file with tasks")
+				return
+			}
+
+			fmt.Println(doneText)
+		default:
+			fmt.Println("Unknown command")
+		}
 	}
 }
