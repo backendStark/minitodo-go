@@ -105,7 +105,9 @@ func main() {
 
 		fmt.Println("Added task:", trimmed)
 	case "list":
-		fmt.Println("Show list")
+		for i, task := range tasks {
+			fmt.Println(i+1, task.Text)
+		}
 	case "done":
 		fmt.Println("Make the task done")
 	default:
