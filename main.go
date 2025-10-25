@@ -2,68 +2,17 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
-	"errors"
 	"fmt"
+	"minitodo/models"
+	"minitodo/storage"
 	"os"
 	"strconv"
 	"strings"
 )
 
-type Task struct {
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-}
-
 const todosFilename = "todos.json"
 
-func loadTasks(filename string) ([]Task, error) {
-	if data, err := os.ReadFile(filename); err == nil {
-		if len(data) == 0 {
-			return []Task{}, nil
-		}
-
-		var tasks []Task
-
-		if err := json.Unmarshal(data, &tasks); err != nil {
-			return nil, fmt.Errorf("error parsing json %w", err)
-		}
-
-		return tasks, nil
-	} else if errors.Is(err, os.ErrNotExist) {
-		file, err := os.Create(filename)
-
-		if err != nil {
-			return nil, fmt.Errorf("error creating json file %w", err)
-		}
-
-		defer file.Close()
-
-		file.Write([]byte("[]"))
-
-		return []Task{}, nil
-	} else {
-		return nil, fmt.Errorf("file has errors %w", err)
-	}
-}
-
-func saveTasks(filename string, tasks []Task) error {
-	data, err := json.MarshalIndent(tasks, "", "  ")
-
-	if err != nil {
-		return fmt.Errorf("cannot serialize tasks for file %w", err)
-	}
-
-	err = os.WriteFile(filename, data, 0644)
-
-	if err != nil {
-		return fmt.Errorf("error writing to file: %w", err)
-	}
-
-	return nil
-}
-
-func formatTask(task Task) string {
+func formatTask(task models.Task) string {
 	var done string
 
 	if !task.Done {
@@ -76,7 +25,7 @@ func formatTask(task Task) string {
 }
 
 func main() {
-	tasks, err := loadTasks(todosFilename)
+	tasks, err := storage.LoadTasks(todosFilename)
 
 	if err != nil {
 		fmt.Println("error with parsing tasks file:", err)
@@ -124,14 +73,14 @@ func main() {
 				return
 			}
 
-			newTask := Task{
+			newTask := models.Task{
 				Text: trimmed,
 				Done: false,
 			}
 
 			tasks = append(tasks, newTask)
 
-			if err := saveTasks(todosFilename, tasks); err != nil {
+			if err := storage.SaveTasks(todosFilename, tasks); err != nil {
 				fmt.Println("Cannot save the file with tasks")
 				return
 			}
@@ -162,7 +111,7 @@ func main() {
 			tasks[num-1].Done = true
 			doneText := fmt.Sprintf("You completed the task %d: %s", num, tasks[num-1].Text)
 
-			if err := saveTasks(todosFilename, tasks); err != nil {
+			if err := storage.SaveTasks(todosFilename, tasks); err != nil {
 				fmt.Println("Cannot save the file with tasks")
 				return
 			}
