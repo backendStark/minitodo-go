@@ -33,6 +33,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case " ":
 			m.tasks[m.cursor].Done = !m.tasks[m.cursor].Done
 			storage.SaveTasks(m.pathToFile, m.tasks)
+		case "delete":
+			if len(m.tasks) == 0 {
+				break
+			}
+
+			m.tasks = append(m.tasks[:m.cursor], m.tasks[m.cursor+1:]...)
+
+			if (m.cursor) >= len(m.tasks) && len(m.tasks) > 0 {
+				m.cursor = len(m.tasks) - 1
+			}
+
+			if len(m.tasks) == 0 {
+				m.cursor = 0
+			}
+
+			storage.SaveTasks(m.pathToFile, m.tasks)
 		case "esc":
 			return m, tea.Quit
 		}
@@ -58,7 +74,10 @@ func (m model) View() string {
 		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, task.Text)
 	}
 
-	s += "\n Use SPACE for toggle done, ESC for quit"
+	s += "\n\nControls:\n"
+	s += "  SPACE - toggle task\n"
+	s += "  DEL   - delete task\n"
+	s += "  ESC   - quit"
 	return s
 }
 
