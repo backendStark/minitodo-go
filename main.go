@@ -21,7 +21,7 @@ func main() {
 	}
 
 	reader := bufio.NewReader(os.Stdin)
-  fmt.Println(`Input one of commands:
+	fmt.Println(`Input one of commands:
     add <text> - add a new task
     list       - view interactive task list
     quit       - exit program`)
