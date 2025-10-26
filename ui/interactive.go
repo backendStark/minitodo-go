@@ -61,3 +61,19 @@ func (m model) View() string {
 	s += "\n Use SPACE for toggle done, ESC for quit"
 	return s
 }
+
+func RunInteractiveList(tasks []models.Task, filename string) error {
+	m := model{
+		cursor:     0,
+		tasks:      tasks,
+		pathToFile: filename,
+	}
+
+	p := tea.NewProgram(m, tea.WithAltScreen())
+
+	if _, err := p.Run(); err != nil {
+		return err
+	}
+
+	return nil
+}
