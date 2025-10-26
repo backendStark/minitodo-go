@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"minitodo/models"
+	"minitodo/storage"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -22,13 +23,41 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "up":
-			fmt.Println("Переводим лист вверх (уменьшим cursor на 1)")
+			if m.cursor > 0 {
+				m.cursor--
+			}
 		case "down":
-			fmt.Println("Переводим лист вниз (увеличим cursor на 1)")
+			if m.cursor < len(m.tasks)-1 {
+				m.cursor++
+			}
 		case " ":
-			fmt.Println("Toggle для чеклиста")
+			m.tasks[m.cursor].Done = !m.tasks[m.cursor].Done
+			storage.SaveTasks(m.pathToFile, m.tasks)
 		case "esc":
-			fmt.Println("Выходим из режима list")
+			return m, tea.Quit
 		}
 	}
+	return m, nil
+}
+
+func (m model) View() string {
+	s := "Список задач:\n\n"
+
+	for i, task := range m.tasks {
+		cursor := " "
+
+		if m.cursor == i {
+			cursor = ">"
+		}
+
+		checked := " "
+		if task.Done {
+			checked = "X"
+		}
+
+		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, task.Text)
+	}
+
+	s += "\n Use SPACE for toggle done, ESC for quit"
+	return s
 }
