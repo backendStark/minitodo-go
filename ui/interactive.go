@@ -41,7 +41,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	s := "Список задач:\n\n"
+	s := "Tasks list:\n\n"
 
 	for i, task := range m.tasks {
 		cursor := " "

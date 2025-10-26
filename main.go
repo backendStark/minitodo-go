@@ -5,24 +5,12 @@ import (
 	"fmt"
 	"minitodo/models"
 	"minitodo/storage"
+	"minitodo/ui"
 	"os"
-	"strconv"
 	"strings"
 )
 
 const todosFilename = "todos.json"
-
-func formatTask(task models.Task) string {
-	var done string
-
-	if !task.Done {
-		done = "[ ]"
-	} else {
-		done = "[X]"
-	}
-
-	return fmt.Sprintf("%s %s", done, task.Text)
-}
 
 func main() {
 	tasks, err := storage.LoadTasks(todosFilename)
@@ -33,6 +21,10 @@ func main() {
 	}
 
 	reader := bufio.NewReader(os.Stdin)
+  fmt.Println(`Input one of commands:
+    add <text> - add a new task
+    list       - view interactive task list
+    quit       - exit program`)
 
 	for {
 		fmt.Print("> ")
@@ -65,7 +57,7 @@ func main() {
 				return
 			}
 
-			text := strings.Join(parts[2:], " ")
+			text := strings.Join(parts[1:], " ")
 			trimmed := strings.TrimSpace(text)
 
 			if len(trimmed) == 0 {
@@ -87,36 +79,17 @@ func main() {
 
 			fmt.Println("Added task:", trimmed)
 		case "list":
-			for i, task := range tasks {
-				fmt.Printf("%d. %s\n", i+1, formatTask(task))
-			}
-		case "done":
-			if len(parts) < 2 {
-				fmt.Println("You need to type task number")
+			if err := ui.RunInteractiveList(tasks, todosFilename); err != nil {
+				fmt.Println("Error running interactive list:", err)
 				return
 			}
 
-			num, err := strconv.Atoi(parts[1])
+			tasks, err = storage.LoadTasks(todosFilename)
 
 			if err != nil {
-				fmt.Println("Cannot to parse tasks number")
+				fmt.Println("Error reloading tasks:", err)
 				return
 			}
-
-			if num < 1 || num > len(tasks) {
-				fmt.Println("Invalid task number")
-				return
-			}
-
-			tasks[num-1].Done = true
-			doneText := fmt.Sprintf("You completed the task %d: %s", num, tasks[num-1].Text)
-
-			if err := storage.SaveTasks(todosFilename, tasks); err != nil {
-				fmt.Println("Cannot save the file with tasks")
-				return
-			}
-
-			fmt.Println(doneText)
 		default:
 			fmt.Println("Unknown command")
 		}
