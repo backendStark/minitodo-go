@@ -1,0 +1,31 @@
+ # Binaries
+minitodo
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/*
+
+# Test and coverage
+*.test
+*.out
+coverage.txt
+
+# User data
+todos.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+vendor/
+
