@@ -25,6 +25,10 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
+	if m.cursor == len(m.tasks) {
+		m.textInput.Focus()
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -77,6 +81,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				storage.SaveTasks(m.pathToFile, m.tasks)
 
 				m.textInput.Reset()
+
+				if len(m.tasks) > 0 {
+					m.cursor = len(m.tasks)
+					m.textInput.Focus()
+				}
 			}
 		case "esc":
 			return m, tea.Quit
