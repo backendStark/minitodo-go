@@ -51,6 +51,28 @@ func (m *model) renderTask(i int, task models.Task) string {
 	return fmt.Sprintf("%s [%s] %s\n", cursor, checked, task.Text)
 }
 
+func (m *model) addTask() error {
+	if m.cursor == len(m.tasks) && strings.TrimSpace(m.textInput.Value()) != "" {
+		task := models.Task{
+			Text: strings.TrimSpace(m.textInput.Value()),
+			Done: false,
+		}
+
+		m.tasks = append(m.tasks, task)
+
+		if err := storage.SaveTasks(m.pathToFile, m.tasks); err != nil {
+			return fmt.Errorf("error saving tasks: %w", err)
+		}
+
+		m.textInput.Reset()
+
+		m.cursor = len(m.tasks)
+		m.updateInputFocus()
+	}
+
+	return nil
+}
+
 const (
 	keyUp     = "up"
 	keyDown   = "down"
@@ -96,22 +118,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				storage.SaveTasks(m.pathToFile, m.tasks)
 			}
 		case keyEnter:
-			if m.cursor == len(m.tasks) && strings.TrimSpace(m.textInput.Value()) != "" {
-				task := models.Task{
-					Text: strings.TrimSpace(m.textInput.Value()),
-					Done: false,
-				}
-
-				m.tasks = append(m.tasks, task)
-
-				storage.SaveTasks(m.pathToFile, m.tasks)
-
-				m.textInput.Reset()
-
-				if len(m.tasks) > 0 {
-					m.cursor = len(m.tasks)
-					m.updateInputFocus()
-				}
+			if err := m.addTask(); err != nil {
+				fmt.Println("Cannot add new task, repeat please")
+				return m, nil
 			}
 		case keyEsc:
 			return m, tea.Quit
