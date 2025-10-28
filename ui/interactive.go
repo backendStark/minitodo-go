@@ -73,6 +73,42 @@ func (m *model) addTask() error {
 	return nil
 }
 
+func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
+	switch key {
+	case keyUp:
+		if m.cursor > 0 {
+			m.cursor--
+		}
+		m.updateInputFocus()
+	case keyDown:
+		if m.cursor < len(m.tasks) {
+			m.cursor++
+		}
+		m.updateInputFocus()
+	case keySpace:
+		if m.cursor < len(m.tasks) {
+			m.tasks[m.cursor].Done = !m.tasks[m.cursor].Done
+			storage.SaveTasks(m.pathToFile, m.tasks)
+		}
+	case keyDelete:
+		if m.cursor < len(m.tasks) {
+			m.tasks = append(m.tasks[:m.cursor], m.tasks[m.cursor+1:]...)
+
+			m.normalizeCursor()
+
+			storage.SaveTasks(m.pathToFile, m.tasks)
+		}
+	case keyEnter:
+		if err := m.addTask(); err != nil {
+			fmt.Println("Cannot add new task, repeat please")
+			return *m, nil
+		}
+	case keyEsc:
+		return *m, tea.Quit
+	}
+	return *m, nil
+}
+
 const (
 	keyUp     = "up"
 	keyDown   = "down"
@@ -93,38 +129,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case keyUp:
-			if m.cursor > 0 {
-				m.cursor--
-			}
-			m.updateInputFocus()
-		case keyDown:
-			if m.cursor < len(m.tasks) {
-				m.cursor++
-			}
-			m.updateInputFocus()
-		case keySpace:
-			if m.cursor < len(m.tasks) {
-				m.tasks[m.cursor].Done = !m.tasks[m.cursor].Done
-				storage.SaveTasks(m.pathToFile, m.tasks)
-			}
-		case keyDelete:
-			if m.cursor < len(m.tasks) {
-				m.tasks = append(m.tasks[:m.cursor], m.tasks[m.cursor+1:]...)
-
-				m.normalizeCursor()
-
-				storage.SaveTasks(m.pathToFile, m.tasks)
-			}
-		case keyEnter:
-			if err := m.addTask(); err != nil {
-				fmt.Println("Cannot add new task, repeat please")
-				return m, nil
-			}
-		case keyEsc:
-			return m, tea.Quit
-		}
+		return handleKeyPress(&m, msg.String())
 	}
 
 	if m.cursor == len(m.tasks) {
