@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"minitodo/config"
 	"minitodo/models"
 	"minitodo/storage"
 	"strings"
@@ -168,8 +169,8 @@ func (m model) View() string {
 
 func RunInteractiveList(tasks []models.Task, filename string) error {
 	ti := textinput.New()
-	ti.Placeholder = "Enter new task text"
-	ti.Width = 50
+	ti.Placeholder = config.InputPlaceholder
+	ti.Width = config.InputWidth
 	ti.Prompt = ""
 
 	m := model{
