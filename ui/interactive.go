@@ -51,6 +51,15 @@ func (m *model) renderTask(i int, task models.Task) string {
 	return fmt.Sprintf("%s [%s] %s\n", cursor, checked, task.Text)
 }
 
+const (
+	keyUp     = "up"
+	keyDown   = "down"
+	keySpace  = " "
+	keyDelete = "delete"
+	keyEnter  = "enter"
+	keyEsc    = "esc"
+)
+
 func (m model) Init() tea.Cmd {
 	return textinput.Blink
 }
@@ -63,22 +72,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "up":
+		case keyUp:
 			if m.cursor > 0 {
 				m.cursor--
 			}
 			m.updateInputFocus()
-		case "down":
+		case keyDown:
 			if m.cursor < len(m.tasks) {
 				m.cursor++
 			}
 			m.updateInputFocus()
-		case " ":
+		case keySpace:
 			if m.cursor < len(m.tasks) {
 				m.tasks[m.cursor].Done = !m.tasks[m.cursor].Done
 				storage.SaveTasks(m.pathToFile, m.tasks)
 			}
-		case "delete":
+		case keyDelete:
 			if m.cursor < len(m.tasks) {
 				m.tasks = append(m.tasks[:m.cursor], m.tasks[m.cursor+1:]...)
 
@@ -86,7 +95,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				storage.SaveTasks(m.pathToFile, m.tasks)
 			}
-		case "enter":
+		case keyEnter:
 			if m.cursor == len(m.tasks) && strings.TrimSpace(m.textInput.Value()) != "" {
 				task := models.Task{
 					Text: strings.TrimSpace(m.textInput.Value()),
@@ -104,7 +113,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.updateInputFocus()
 				}
 			}
-		case "esc":
+		case keyEsc:
 			return m, tea.Quit
 		}
 	}
