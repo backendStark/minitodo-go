@@ -9,33 +9,29 @@ import (
 )
 
 func LoadTasks(filename string) ([]models.Task, error) {
-	if data, err := os.ReadFile(filename); err == nil {
-		if len(data) == 0 {
-			return []models.Task{}, nil
+	data, err := os.ReadFile(filename)
+
+	if errors.Is(err, os.ErrNotExist) {
+		if err := os.WriteFile(filename, []byte("[]"), 0644); err != nil {
+			return nil, fmt.Errorf("error creating file: %w", err)
 		}
-
-		var tasks []models.Task
-
-		if err := json.Unmarshal(data, &tasks); err != nil {
-			return nil, fmt.Errorf("error parsing json %w", err)
-		}
-
-		return tasks, nil
-	} else if errors.Is(err, os.ErrNotExist) {
-		file, err := os.Create(filename)
-
-		if err != nil {
-			return nil, fmt.Errorf("error creating json file %w", err)
-		}
-
-		defer file.Close()
-
-		file.Write([]byte("[]"))
-
 		return []models.Task{}, nil
-	} else {
-		return nil, fmt.Errorf("file has errors %w", err)
 	}
+
+	if err != nil {
+		return nil, fmt.Errorf("error reading file: %w", err)
+	}
+
+	if len(data) == 0 {
+		return []models.Task{}, nil
+	}
+
+	var tasks []models.Task
+	if err := json.Unmarshal(data, &tasks); err != nil {
+		return nil, fmt.Errorf("error parsing json: %w", err)
+	}
+
+	return tasks, nil
 }
 
 func SaveTasks(filename string, tasks []models.Task) error {
