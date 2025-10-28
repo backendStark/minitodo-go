@@ -130,11 +130,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		return handleKeyPress(&m, msg.String())
-	}
+		updatedModel, keyCmd := handleKeyPress(&m, msg.String())
 
-	if m.cursor == len(m.tasks) {
-		m.textInput, cmd = m.textInput.Update(msg)
+		if keyCmd != nil {
+			return updatedModel, keyCmd
+		}
+
+		if m.cursor == len(m.tasks) {
+			m.textInput, cmd = m.textInput.Update(msg)
+		}
 	}
 
 	return m, cmd
