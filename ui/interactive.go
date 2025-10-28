@@ -87,7 +87,7 @@ func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
 		m.updateInputFocus()
 	case keySpace:
 		if m.cursor < len(m.tasks) {
-			m.tasks[m.cursor].Done = !m.tasks[m.cursor].Done
+			m.tasks[m.cursor].Toggle()
 			storage.SaveTasks(m.pathToFile, m.tasks)
 		}
 	case keyDelete:
