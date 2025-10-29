@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"minitodo/config"
 	"minitodo/models"
+	"minitodo/storage"
 
 	textinput "github.com/charmbracelet/bubbles/textinput"
 
@@ -14,7 +15,7 @@ type model struct {
 	cursor      int
 	textInput   textinput.Model
 	err         error
-	taskManager *models.TaskManager
+	taskManager *storage.TaskManager
 }
 
 func (m *model) updateInputFocus() {
@@ -138,7 +139,7 @@ func (m model) View() string {
 	if m.taskManager.GetCount() == 0 {
 		s += "(no tasks yet)\n\n"
 	} else {
-		for i, task := range m.tasks {
+		for i, task := range m.taskManager.GetAll() {
 			s += m.renderTask(i, task)
 		}
 	}
@@ -163,17 +164,22 @@ func (m model) View() string {
 	return s
 }
 
-func RunInteractiveList(tasks []models.Task, filename string) error {
+func RunInteractiveList(filename string) error {
 	ti := textinput.New()
 	ti.Placeholder = config.InputPlaceholder
 	ti.Width = config.InputWidth
 	ti.Prompt = ""
 
+	taskManager, err := storage.NewTaskManager(filename)
+
+	if err != nil {
+		return fmt.Errorf("error with creating taskManager: %w", err)
+	}
+
 	m := model{
-		cursor:     0,
-		tasks:      tasks,
-		pathToFile: filename,
-		textInput:  ti,
+		cursor:      0,
+		textInput:   ti,
+		taskManager: taskManager,
 	}
 
 	p := tea.NewProgram(m, tea.WithAltScreen())

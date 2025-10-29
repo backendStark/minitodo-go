@@ -1,18 +1,18 @@
-package models
+package storage
 
 import (
 	"errors"
-	"minitodo/storage"
+	"minitodo/models"
 	"strings"
 )
 
 type TaskManager struct {
-	tasks      []Task
+	tasks      []models.Task
 	pathToFile string
 }
 
 func NewTaskManager(filename string) (*TaskManager, error) {
-	tasks, err := storage.LoadTasks(filename)
+	tasks, err := LoadTasks(filename)
 
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (tm *TaskManager) Toggle(index int) error {
 		return errors.New("invalid index")
 	}
 	tm.tasks[index].Toggle()
-	return storage.SaveTasks(tm.pathToFile, tm.tasks)
+	return SaveTasks(tm.pathToFile, tm.tasks)
 }
 
 func (tm *TaskManager) Delete(index int) error {
@@ -35,7 +35,7 @@ func (tm *TaskManager) Delete(index int) error {
 	}
 
 	tm.tasks = append(tm.tasks[:index], tm.tasks[index+1:]...)
-	return storage.SaveTasks(tm.pathToFile, tm.tasks)
+	return SaveTasks(tm.pathToFile, tm.tasks)
 }
 
 func (tm *TaskManager) Add(text string) error {
@@ -43,18 +43,18 @@ func (tm *TaskManager) Add(text string) error {
 		return errors.New("text is empty")
 	}
 
-	task := Task{
+	task := models.Task{
 		Text: strings.TrimSpace(text),
 		Done: false,
 	}
 
 	tm.tasks = append(tm.tasks, task)
 
-	return storage.SaveTasks(tm.pathToFile, tm.tasks)
+	return SaveTasks(tm.pathToFile, tm.tasks)
 }
 
-func (tm *TaskManager) GetAll() []Task {
-	newCopy := make([]Task, len(tm.tasks))
+func (tm *TaskManager) GetAll() []models.Task {
+	newCopy := make([]models.Task, len(tm.tasks))
 	copy(newCopy, tm.tasks)
 	return newCopy
 }
