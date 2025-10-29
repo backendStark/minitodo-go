@@ -5,7 +5,6 @@ import (
 	"minitodo/config"
 	"minitodo/models"
 	"minitodo/storage"
-	"strings"
 
 	textinput "github.com/charmbracelet/bubbles/textinput"
 
@@ -53,20 +52,8 @@ func (m *model) renderTask(i int, task models.Task) string {
 }
 
 func (m *model) addTask() error {
-	if m.cursor == m.taskManager.GetCount() && strings.TrimSpace(m.textInput.Value()) != "" {
-		task := models.Task{
-			Text: strings.TrimSpace(m.textInput.Value()),
-			Done: false,
-		}
-
-		m.tasks = append(m.tasks, task)
-
-		if err := storage.SaveTasks(m.pathToFile, m.tasks); err != nil {
-			return fmt.Errorf("error saving tasks: %w", err)
-		}
-
-		m.textInput.Reset()
-
+	if m.cursor == m.taskManager.GetCount() {
+		m.taskManager.Add(m.textInput.Value())
 		m.cursor = m.taskManager.GetCount()
 		m.updateInputFocus()
 	}
