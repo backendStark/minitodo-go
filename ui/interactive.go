@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"minitodo/config"
 	"minitodo/models"
-	"minitodo/storage"
 
 	textinput "github.com/charmbracelet/bubbles/textinput"
 
@@ -76,20 +75,14 @@ func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
 		m.updateInputFocus()
 	case keySpace:
 		if m.cursor < m.taskManager.GetCount() {
-			m.tasks[m.cursor].Toggle()
-
-			if err := storage.SaveTasks(m.pathToFile, m.tasks); err != nil {
+			if err := m.taskManager.Toggle(m.cursor); err != nil {
 				m.err = err
 				return *m, nil
 			}
 		}
 	case keyDelete:
 		if m.cursor < m.taskManager.GetCount() {
-			m.tasks = append(m.tasks[:m.cursor], m.tasks[m.cursor+1:]...)
-
-			m.normalizeCursor()
-
-			if err := storage.SaveTasks(m.pathToFile, m.tasks); err != nil {
+			if err := m.taskManager.Delete(m.cursor); err != nil {
 				m.err = err
 				return *m, nil
 			}
