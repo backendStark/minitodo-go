@@ -13,15 +13,14 @@ import (
 )
 
 type model struct {
-	cursor     int
-	tasks      []models.Task
-	pathToFile string
-	textInput  textinput.Model
-	err        error
+	cursor      int
+	textInput   textinput.Model
+	err         error
+	taskManager *models.TaskManager
 }
 
 func (m *model) updateInputFocus() {
-	if m.cursor == len(m.tasks) {
+	if m.cursor == m.taskManager.GetCount() {
 		m.textInput.Focus()
 	} else {
 		m.textInput.Blur()
@@ -29,11 +28,11 @@ func (m *model) updateInputFocus() {
 }
 
 func (m *model) normalizeCursor() {
-	if (m.cursor) >= len(m.tasks) && len(m.tasks) > 0 {
-		m.cursor = len(m.tasks) - 1
+	if (m.cursor) >= m.taskManager.GetCount() && m.taskManager.GetCount() > 0 {
+		m.cursor = m.taskManager.GetCount() - 1
 	}
 
-	if len(m.tasks) == 0 {
+	if m.taskManager.GetCount() == 0 {
 		m.cursor = 0
 	}
 }
@@ -54,7 +53,7 @@ func (m *model) renderTask(i int, task models.Task) string {
 }
 
 func (m *model) addTask() error {
-	if m.cursor == len(m.tasks) && strings.TrimSpace(m.textInput.Value()) != "" {
+	if m.cursor == m.taskManager.GetCount() && strings.TrimSpace(m.textInput.Value()) != "" {
 		task := models.Task{
 			Text: strings.TrimSpace(m.textInput.Value()),
 			Done: false,
@@ -68,7 +67,7 @@ func (m *model) addTask() error {
 
 		m.textInput.Reset()
 
-		m.cursor = len(m.tasks)
+		m.cursor = m.taskManager.GetCount()
 		m.updateInputFocus()
 	}
 
@@ -84,12 +83,12 @@ func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
 		}
 		m.updateInputFocus()
 	case keyDown:
-		if m.cursor < len(m.tasks) {
+		if m.cursor < m.taskManager.GetCount() {
 			m.cursor++
 		}
 		m.updateInputFocus()
 	case keySpace:
-		if m.cursor < len(m.tasks) {
+		if m.cursor < m.taskManager.GetCount() {
 			m.tasks[m.cursor].Toggle()
 
 			if err := storage.SaveTasks(m.pathToFile, m.tasks); err != nil {
@@ -98,7 +97,7 @@ func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
 			}
 		}
 	case keyDelete:
-		if m.cursor < len(m.tasks) {
+		if m.cursor < m.taskManager.GetCount() {
 			m.tasks = append(m.tasks[:m.cursor], m.tasks[m.cursor+1:]...)
 
 			m.normalizeCursor()
@@ -145,7 +144,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return updatedModel, keyCmd
 		}
 
-		if m.cursor == len(m.tasks) {
+		if m.cursor == m.taskManager.GetCount() {
 			m.textInput, cmd = m.textInput.Update(msg)
 		}
 	}
@@ -156,7 +155,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	s := "Tasks list:\n\n"
 
-	if len(m.tasks) == 0 {
+	if m.taskManager.GetCount() == 0 {
 		s += "(no tasks yet)\n\n"
 	} else {
 		for i, task := range m.tasks {
@@ -166,7 +165,7 @@ func (m model) View() string {
 
 	cursor := " "
 
-	if m.cursor == len(m.tasks) {
+	if m.cursor == m.taskManager.GetCount() {
 		cursor = ">"
 	}
 
