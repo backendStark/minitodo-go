@@ -17,6 +17,7 @@ type model struct {
 	tasks      []models.Task
 	pathToFile string
 	textInput  textinput.Model
+	err        error
 }
 
 func (m *model) updateInputFocus() {
@@ -75,6 +76,7 @@ func (m *model) addTask() error {
 }
 
 func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
+	m.err = nil
 	switch key {
 	case keyUp:
 		if m.cursor > 0 {
@@ -89,7 +91,11 @@ func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
 	case keySpace:
 		if m.cursor < len(m.tasks) {
 			m.tasks[m.cursor].Toggle()
-			storage.SaveTasks(m.pathToFile, m.tasks)
+
+			if err := storage.SaveTasks(m.pathToFile, m.tasks); err != nil {
+				m.err = err
+				return *m, nil
+			}
 		}
 	case keyDelete:
 		if m.cursor < len(m.tasks) {
@@ -97,11 +103,14 @@ func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
 
 			m.normalizeCursor()
 
-			storage.SaveTasks(m.pathToFile, m.tasks)
+			if err := storage.SaveTasks(m.pathToFile, m.tasks); err != nil {
+				m.err = err
+				return *m, nil
+			}
 		}
 	case keyEnter:
 		if err := m.addTask(); err != nil {
-			fmt.Println("Cannot add new task, repeat please")
+			m.err = err
 			return *m, nil
 		}
 	case keyEsc:
@@ -168,6 +177,10 @@ func (m model) View() string {
 	s += "  DEL   - delete task\n"
 	s += "  ENTER - add task (when on input)\n"
 	s += "  ESC   - quit"
+
+	if m.err != nil {
+		s += fmt.Sprintf("\n\nError: %v", m.err)
+	}
 	return s
 }
 
