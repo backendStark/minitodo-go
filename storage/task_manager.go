@@ -7,18 +7,27 @@ import (
 )
 
 type TaskManager struct {
-	tasks      []models.Task
-	pathToFile string
+	tasks   []models.Task
+	storage Storage
 }
 
 func NewTaskManager(filename string) (*TaskManager, error) {
-	tasks, err := LoadTasks(filename)
+	storage := NewFileStorage(filename)
+
+	return NewTaskManagerWithStorage(storage)
+}
+
+func NewTaskManagerWithStorage(storage Storage) (*TaskManager, error) {
+	tasks, err := storage.Load()
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &TaskManager{tasks: tasks, pathToFile: filename}, nil
+	return &TaskManager{
+		tasks:   tasks,
+		storage: storage,
+	}, nil
 }
 
 func (tm *TaskManager) Toggle(index int) error {
@@ -26,7 +35,7 @@ func (tm *TaskManager) Toggle(index int) error {
 		return errors.New("invalid index")
 	}
 	tm.tasks[index].Toggle()
-	return SaveTasks(tm.pathToFile, tm.tasks)
+	return tm.storage.Save(tm.tasks)
 }
 
 func (tm *TaskManager) Delete(index int) error {
@@ -35,7 +44,7 @@ func (tm *TaskManager) Delete(index int) error {
 	}
 
 	tm.tasks = append(tm.tasks[:index], tm.tasks[index+1:]...)
-	return SaveTasks(tm.pathToFile, tm.tasks)
+	return tm.storage.Save(tm.tasks)
 }
 
 func (tm *TaskManager) Add(text string) error {
@@ -50,7 +59,7 @@ func (tm *TaskManager) Add(text string) error {
 
 	tm.tasks = append(tm.tasks, task)
 
-	return SaveTasks(tm.pathToFile, tm.tasks)
+	return tm.storage.Save(tm.tasks)
 }
 
 func (tm *TaskManager) GetAll() []models.Task {
