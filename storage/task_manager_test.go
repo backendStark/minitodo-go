@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"minitodo/models"
 	"os"
 	"path/filepath"
@@ -204,5 +205,20 @@ func TestTaskManager_NewTaskManager_Succes(t *testing.T) {
 
 	if tm.GetCount() != 0 {
 		t.Errorf("Expected 0 tasks, got: %d", tm.GetCount())
+	}
+}
+
+func TestTaskManager_NewTaskManagerWithStorage_LoadError(t *testing.T) {
+	mockStorage := NewMockStorage([]models.Task{})
+	mockStorage.SetLoadError(errors.New("failed to load tasks"))
+
+	tm, err := NewTaskManagerWithStorage(mockStorage)
+
+	if err == nil {
+		t.Error("Expected error from Load, got nil")
+	}
+
+	if tm != nil {
+		t.Error("Expected nil TaskManager on error, got non-nil")
 	}
 }
