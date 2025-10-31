@@ -74,3 +74,25 @@ func TestTaskManager_Toggle_Success(t *testing.T) {
 		t.Errorf("Expected 2 Save call, got: %d", mockStorage.GetSaveCalls())
 	}
 }
+
+func TestTaskManager_Toggle_InvalidIndex(t *testing.T) {
+	mockTasks := []models.Task{{Text: "Buy milk", Done: false}}
+	mockStorage := NewMockStorage(mockTasks)
+	tm, err := NewTaskManagerWithStorage(mockStorage)
+
+	if err != nil {
+		t.Fatalf("Failed to create TaskManager: %v", err)
+	}
+
+	err = tm.Toggle(-1)
+
+	if err == nil {
+		t.Error("Expected error for negative index, got nil")
+	}
+
+	err = tm.Toggle(1)
+
+	if err == nil {
+		t.Error("Expected error for too large index, got nil")
+	}
+}
