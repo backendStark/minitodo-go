@@ -5,15 +5,23 @@ import (
 	"testing"
 )
 
-func TestTaskManager_Add_Success(t *testing.T) {
-	mockStorage := NewMockStorage([]models.Task{})
+func createMockTaskManager(t *testing.T, tasks []models.Task) (*TaskManager, *MockStorage) {
+	t.Helper()
+	
+	mockStorage := NewMockStorage(tasks)
 	tm, err := NewTaskManagerWithStorage(mockStorage)
 
 	if err != nil {
 		t.Fatalf("Failed to create TaskManager: %v", err)
 	}
 
-	err = tm.Add("Buy milk")
+	return tm, mockStorage
+}
+
+func TestTaskManager_Add_Success(t *testing.T) {
+	tm, mockStorage := createMockTaskManager(t, []models.Task{})
+
+	err := tm.Add("Buy milk")
 
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
@@ -38,15 +46,9 @@ func TestTaskManager_Add_Success(t *testing.T) {
 }
 
 func TestTaskManager_Toggle_Success(t *testing.T) {
-	mockTasks := []models.Task{{Text: "Buy milk", Done: false}}
-	mockStorage := NewMockStorage(mockTasks)
-	tm, err := NewTaskManagerWithStorage(mockStorage)
+	tm, mockStorage := createMockTaskManager(t, []models.Task{{Text: "Buy milk", Done: false}})
 
-	if err != nil {
-		t.Fatalf("Failed to create TaskManager: %v", err)
-	}
-
-	err = tm.Toggle(0)
+	err := tm.Toggle(0)
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
 	}
@@ -76,15 +78,9 @@ func TestTaskManager_Toggle_Success(t *testing.T) {
 }
 
 func TestTaskManager_Toggle_InvalidIndex(t *testing.T) {
-	mockTasks := []models.Task{{Text: "Buy milk", Done: false}}
-	mockStorage := NewMockStorage(mockTasks)
-	tm, err := NewTaskManagerWithStorage(mockStorage)
+	tm, _ := createMockTaskManager(t, []models.Task{{Text: "Buy milk", Done: false}})
 
-	if err != nil {
-		t.Fatalf("Failed to create TaskManager: %v", err)
-	}
-
-	err = tm.Toggle(-1)
+	err := tm.Toggle(-1)
 
 	if err == nil {
 		t.Error("Expected error for negative index, got nil")
