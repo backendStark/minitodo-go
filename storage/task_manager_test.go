@@ -36,3 +36,41 @@ func TestTaskManager_Add_Success(t *testing.T) {
 		t.Errorf("Expected 1 Save call, got: %d", mockStorage.GetSaveCalls())
 	}
 }
+
+func TestTaskManager_Toggle_Success(t *testing.T) {
+	mockTasks := []models.Task{{Text: "Buy milk", Done: false}}
+	mockStorage := NewMockStorage(mockTasks)
+	tm, err := NewTaskManagerWithStorage(mockStorage)
+
+	if err != nil {
+		t.Fatalf("Failed to create TaskManager: %v", err)
+	}
+
+	err = tm.Toggle(0)
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+
+	tasks := tm.GetAll()
+	if tasks[0].Done != true {
+		t.Errorf("Expected Done=true, got: %v", tasks[0].Done)
+	}
+
+	if mockStorage.GetSaveCalls() != 1 {
+		t.Errorf("Expected 1 Save call, got: %d", mockStorage.GetSaveCalls())
+	}
+
+	err = tm.Toggle(0)
+	if err != nil {
+		t.Errorf("Expected no error on second toggle, got: %v", err)
+	}
+
+	tasks = tm.GetAll()
+	if tasks[0].Done != false {
+		t.Errorf("Expected Done=false, got: %v", tasks[0].Done)
+	}
+
+	if mockStorage.GetSaveCalls() != 2 {
+		t.Errorf("Expected 2 Save call, got: %d", mockStorage.GetSaveCalls())
+	}
+}
