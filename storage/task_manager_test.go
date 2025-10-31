@@ -2,6 +2,8 @@ package storage
 
 import (
 	"minitodo/models"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -179,5 +181,28 @@ func TestTaskManager_Delete_MiddleTask(t *testing.T) {
 
 	if remaining[1].Text != "Task 3" {
 		t.Errorf("Expected first tasks text is 'Task 3', got: %s", remaining[1].Text)
+	}
+}
+
+func TestTaskManager_NewTaskManager_Succes(t *testing.T) {
+	tmpDir := t.TempDir()
+	filename := filepath.Join(tmpDir, "test_todos.json")
+
+	tm, err := NewTaskManager(filename)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+
+	if tm == nil {
+		t.Fatal("Expected TaskManager, got nil")
+	}
+
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		t.Error("Expected file to be created")
+	}
+
+	if tm.GetCount() != 0 {
+		t.Errorf("Expected 0 tasks, got: %d", tm.GetCount())
 	}
 }
