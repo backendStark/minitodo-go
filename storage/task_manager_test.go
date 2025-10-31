@@ -45,6 +45,32 @@ func TestTaskManager_Add_Success(t *testing.T) {
 	}
 }
 
+func TestTaskManager_Add_EmptyTask(t *testing.T) {
+	tm, _ := createMockTaskManager(t, []models.Task{})
+
+	err := tm.Add("")
+
+	if err == nil {
+		t.Error("Expected error for empty task, got nil")
+	}
+
+	err = tm.Add("   ")
+
+	if err == nil {
+		t.Error("Expected error for empty whitespace task, got nil")
+	}
+
+	err = tm.Add(" \n  ")
+
+	if err == nil {
+		t.Error("Expected error for whitespace with newline, got nil")
+	}
+
+	if tm.GetCount() != 0 {
+		t.Errorf("Expected 0 tasks after failed add, got %d", tm.GetCount())
+	}
+}
+
 func TestTaskManager_Toggle_Success(t *testing.T) {
 	tm, mockStorage := createMockTaskManager(t, []models.Task{{Text: "Buy milk", Done: false}})
 
