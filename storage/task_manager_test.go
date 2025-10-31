@@ -7,7 +7,7 @@ import (
 
 func createMockTaskManager(t *testing.T, tasks []models.Task) (*TaskManager, *MockStorage) {
 	t.Helper()
-	
+
 	mockStorage := NewMockStorage(tasks)
 	tm, err := NewTaskManagerWithStorage(mockStorage)
 
@@ -90,5 +90,68 @@ func TestTaskManager_Toggle_InvalidIndex(t *testing.T) {
 
 	if err == nil {
 		t.Error("Expected error for too large index, got nil")
+	}
+}
+
+func TestTaskManager_Delete_Success(t *testing.T) {
+	tm, mockStorage := createMockTaskManager(t, []models.Task{{Text: "Buy milk", Done: false}})
+
+	err := tm.Delete(0)
+
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+
+	if mockStorage.GetSaveCalls() != 1 {
+		t.Errorf("Expected 1 Save call, got: %d", mockStorage.GetSaveCalls())
+	}
+
+	if tm.GetCount() != 0 {
+		t.Errorf("Expected 0 tasks, got: %d", tm.GetCount())
+	}
+}
+
+func TestTaskManager_Delete_InvalidIndex(t *testing.T) {
+	tm, _ := createMockTaskManager(t, []models.Task{{Text: "Buy milk", Done: false}})
+
+	err := tm.Delete(-1)
+
+	if err == nil {
+		t.Error("Expected error for negative index for delete, got nil")
+	}
+
+	err = tm.Delete(1)
+
+	if err == nil {
+		t.Error("Expected error for too large index for delete, got nil")
+	}
+}
+
+func TestTaskManager_Delete_MiddleTask(t *testing.T) {
+	tasks := []models.Task{
+		{Text: "Task 1", Done: false},
+		{Text: "Task 2", Done: false},
+		{Text: "Task 3", Done: false},
+	}
+	tm, _ := createMockTaskManager(t, tasks)
+
+	err := tm.Delete(1)
+
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+
+	remaining := tm.GetAll()
+
+	if len(remaining) != 2 {
+		t.Errorf("Expected 2 tasks, got: %d", len(remaining))
+	}
+
+	if remaining[0].Text != "Task 1" {
+		t.Errorf("Expected first tasks text is 'Task 1', got: %s", remaining[0].Text)
+	}
+
+	if remaining[1].Text != "Task 3" {
+		t.Errorf("Expected first tasks text is 'Task 3', got: %s", remaining[1].Text)
 	}
 }
