@@ -53,8 +53,11 @@ func (m *model) renderTask(i int, task models.Task) string {
 
 func (m *model) addTask() error {
 	if m.cursor == m.taskManager.GetCount() {
-		m.taskManager.Add(m.textInput.Value())
+		if err := m.taskManager.Add(m.textInput.Value()); err != nil {
+			return err
+		}
 		m.cursor = m.taskManager.GetCount()
+		m.textInput.Reset()
 		m.updateInputFocus()
 	}
 
