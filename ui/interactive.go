@@ -106,6 +106,7 @@ func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
 				m.err = err
 				return *m, nil
 			}
+			m.normalizeCursor()
 		}
 	case keyEnter:
 		if err := m.addTask(); err != nil {
