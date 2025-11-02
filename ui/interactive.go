@@ -137,7 +137,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	s := "Tasks list:\n\n"
+	doneCount := m.taskManager.GetDoneCount()
+	totalCount := m.taskManager.GetCount()
+	sortMode := m.taskManager.GetSortMode().String()
+
+	s := fmt.Sprintf("Tasks: %d/%d | [S]ort: %s\n\n", doneCount, totalCount, sortMode)
 
 	if m.taskManager.GetCount() == 0 {
 		s += "(no tasks yet)\n\n"
