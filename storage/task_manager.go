@@ -3,6 +3,7 @@ package storage
 import (
 	"errors"
 	"minitodo/models"
+	"sort"
 	"strings"
 )
 
@@ -26,8 +27,8 @@ func NewTaskManagerWithStorage(storage Storage) (*TaskManager, error) {
 	}
 
 	return &TaskManager{
-		tasks:   tasks,
-		storage: storage,
+		tasks:    tasks,
+		storage:  storage,
 		sortMode: models.SortByStatus,
 	}, nil
 }
@@ -72,4 +73,31 @@ func (tm *TaskManager) GetAll() []models.Task {
 
 func (tm *TaskManager) GetCount() int {
 	return len(tm.tasks)
+}
+
+func (tm *TaskManager) Sort() {
+	comparator := func(i, j int) bool {
+		if tm.sortMode == models.SortByStatus {
+			if tm.tasks[i].Done != tm.tasks[j].Done {
+				return !tm.tasks[i].Done
+			}
+		} else if tm.sortMode == models.SortByStatusReverse {
+			if tm.tasks[i].Done != tm.tasks[j].Done {
+				return tm.tasks[i].Done
+			}
+		}
+		return false
+	}
+
+	sort.SliceStable(tm.tasks, comparator)
+}
+
+func (tm *TaskManager) ToggleSortMode() {
+	if tm.sortMode == models.SortByStatus {
+		tm.sortMode = models.SortByStatusReverse
+	} else {
+		tm.sortMode = models.SortByStatus
+	}
+
+	tm.Sort()
 }
