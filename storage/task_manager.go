@@ -102,7 +102,17 @@ func (tm *TaskManager) ToggleSortMode() {
 	tm.Sort()
 }
 
-
 func (tm *TaskManager) GetSortMode() models.SortMode {
 	return tm.sortMode
+}
+
+func (tm *TaskManager) GetDoneCount() int {
+	doneCount := 0
+	for _, task := range tm.GetAll() {
+		if task.Done {
+			doneCount++
+		}
+	}
+
+	return doneCount
 }
