@@ -88,18 +88,20 @@ func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
 		}
 		m.updateInputFocus()
 	case keySpace:
-		if m.cursor < m.taskManager.GetCount() {
+		if m.IsNotOnInputField() {
 			if err := m.taskManager.Toggle(m.cursor); err != nil {
 				m.err = err
 				return *m, nil
 			}
 		}
 	case keySort:
-		m.taskManager.ToggleSortMode()
-		m.cursor = 0
-		m.updateInputFocus()
+		if m.IsNotOnInputField() {
+			m.taskManager.ToggleSortMode()
+			m.cursor = 0
+			m.updateInputFocus()
+		}
 	case keyDelete:
-		if m.cursor < m.taskManager.GetCount() {
+		if m.IsNotOnInputField() {
 			if err := m.taskManager.Delete(m.cursor); err != nil {
 				m.err = err
 				return *m, nil
@@ -202,4 +204,8 @@ func RunInteractiveList(filename string) error {
 	}
 
 	return nil
+}
+
+func (m model) IsNotOnInputField() bool {
+	return m.cursor < m.taskManager.GetCount()
 }
