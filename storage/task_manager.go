@@ -101,3 +101,8 @@ func (tm *TaskManager) ToggleSortMode() {
 
 	tm.Sort()
 }
+
+
+func (tm *TaskManager) GetSortMode() models.SortMode {
+	return tm.sortMode
+}
