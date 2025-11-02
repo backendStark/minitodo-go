@@ -11,6 +11,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+const (
+	keyUp     = "up"
+	keyDown   = "down"
+	keySpace  = " "
+	keyDelete = "delete"
+	keyEnter  = "enter"
+	keyEsc    = "esc"
+	keySort   = "s"
+)
+
 type model struct {
 	cursor      int
 	textInput   textinput.Model
@@ -84,6 +94,10 @@ func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
 				return *m, nil
 			}
 		}
+	case keySort:
+		m.taskManager.ToggleSortMode()
+		m.cursor = 0
+		m.updateInputFocus()
 	case keyDelete:
 		if m.cursor < m.taskManager.GetCount() {
 			if err := m.taskManager.Delete(m.cursor); err != nil {
@@ -101,15 +115,6 @@ func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
 	}
 	return *m, nil
 }
-
-const (
-	keyUp     = "up"
-	keyDown   = "down"
-	keySpace  = " "
-	keyDelete = "delete"
-	keyEnter  = "enter"
-	keyEsc    = "esc"
-)
 
 func (m model) Init() tea.Cmd {
 	return textinput.Blink
@@ -161,6 +166,7 @@ func (m model) View() string {
 
 	s += "\n\nControls:\n"
 	s += "  SPACE - toggle task\n"
+	s += "  S     - sort tasks\n"
 	s += "  DEL   - delete task\n"
 	s += "  ENTER - add task (when on input)\n"
 	s += "  ESC   - quit"
