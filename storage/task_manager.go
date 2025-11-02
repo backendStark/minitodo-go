@@ -7,8 +7,9 @@ import (
 )
 
 type TaskManager struct {
-	tasks   []models.Task
-	storage Storage
+	tasks    []models.Task
+	storage  Storage
+	sortMode models.SortMode
 }
 
 func NewTaskManager(filename string) (*TaskManager, error) {
@@ -27,6 +28,7 @@ func NewTaskManagerWithStorage(storage Storage) (*TaskManager, error) {
 	return &TaskManager{
 		tasks:   tasks,
 		storage: storage,
+		sortMode: models.SortByStatus,
 	}, nil
 }
 
