@@ -291,3 +291,38 @@ func TestTaskManager_Sort_Success(t *testing.T) {
 		}
 	}
 }
+
+func TestTaskManager_Sort_Reverse_Success(t *testing.T) {
+	tasks := []models.Task{
+		{Text: "Task 1", Done: false},
+		{Text: "Task 2", Done: false},
+		{Text: "Task 3", Done: true},
+	}
+
+	tm, _ := createMockTaskManager(t, tasks)
+
+	tm.ToggleSortMode()
+	tm.Sort()
+
+	sortedTasks := []models.Task{
+		{Text: "Task 3", Done: true},
+		{Text: "Task 1", Done: false},
+		{Text: "Task 2", Done: false},
+	}
+
+	actualTasks := tm.GetAll()
+
+	if len(actualTasks) != len(sortedTasks) {
+		t.Fatalf("Expected %d tasks, got %d", len(sortedTasks), len(actualTasks))
+	}
+
+	for i := 0; i < len(sortedTasks); i++ {
+		if actualTasks[i].Text != sortedTasks[i].Text {
+			t.Errorf("Task at index %d: expected text '%s', got '%s'", i, sortedTasks[i].Text, actualTasks[i].Text)
+		}
+
+		if actualTasks[i].Done != sortedTasks[i].Done {
+			t.Errorf("Task at index %d: expected Done=%v, got Done=%v", i, sortedTasks[i].Done, actualTasks[i].Done)
+		}
+	}
+}
