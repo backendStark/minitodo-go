@@ -222,3 +222,17 @@ func TestTaskManager_NewTaskManagerWithStorage_LoadError(t *testing.T) {
 		t.Error("Expected nil TaskManager on error, got non-nil")
 	}
 }
+
+func TestTaskManger_GetDoneCount_Success(t *testing.T) {
+	tasks := []models.Task{
+		{Text: "Task 1", Done: true},
+		{Text: "Task 2", Done: true},
+		{Text: "Task 3", Done: true},
+	}
+
+	tm, _ := createMockTaskManager(t, tasks)
+
+	if tm.GetDoneCount() != 3 {
+		t.Error("Expected 3 done tasks, but got:", tm.GetDoneCount())
+	}
+}
