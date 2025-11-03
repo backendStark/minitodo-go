@@ -223,7 +223,7 @@ func TestTaskManager_NewTaskManagerWithStorage_LoadError(t *testing.T) {
 	}
 }
 
-func TestTaskManger_GetDoneCount_Success(t *testing.T) {
+func TestTaskManager_GetDoneCount_Success(t *testing.T) {
 	tasks := []models.Task{
 		{Text: "Task 1", Done: true},
 		{Text: "Task 2", Done: true},
@@ -236,3 +236,5 @@ func TestTaskManger_GetDoneCount_Success(t *testing.T) {
 		t.Error("Expected 3 done tasks, but got:", tm.GetDoneCount())
 	}
 }
+
+func TestTask
