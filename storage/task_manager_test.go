@@ -243,3 +243,17 @@ func TestTaskManager_GetSortMode_Success(t *testing.T) {
 		t.Errorf("Expected sort mode by default be %s, but got: %s", models.SortByStatus.String(), tm.sortMode.String())
 	}
 }
+
+func TestTaskManager_ToggleSortMode_Success(t *testing.T) {
+	tm, _ := createMockTaskManager(t, []models.Task{})
+
+	if tm.sortMode != models.SortByStatus {
+		t.Errorf("Expected sort mode by default be %s, but got: %s", models.SortByStatus.String(), tm.sortMode.String())
+	}
+
+	tm.ToggleSortMode()
+
+	if tm.sortMode != models.SortByStatusReverse {
+		t.Errorf("Expected sort mode after toggle sort must be %s, but got: %s", models.SortByStatusReverse.String(), tm.sortMode.String())
+	}
+}
