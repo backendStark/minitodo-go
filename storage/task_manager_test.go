@@ -237,4 +237,9 @@ func TestTaskManager_GetDoneCount_Success(t *testing.T) {
 	}
 }
 
-func TestTask
+func TestTaskManager_GetSortMode_Success(t *testing.T) {
+	tm, _ := createMockTaskManager(t, []models.Task{})
+	if tm.sortMode != models.SortByStatus {
+		t.Errorf("Expected sort mode by default be %s, but got: %s", models.SortByStatus.String(), tm.sortMode.String())
+	}
+}
