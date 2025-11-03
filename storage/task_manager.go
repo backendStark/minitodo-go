@@ -77,11 +77,12 @@ func (tm *TaskManager) GetCount() int {
 
 func (tm *TaskManager) Sort() {
 	comparator := func(i, j int) bool {
-		if tm.sortMode == models.SortByStatus {
+		switch tm.sortMode {
+		case models.SortByStatus:
 			if tm.tasks[i].Done != tm.tasks[j].Done {
 				return !tm.tasks[i].Done
 			}
-		} else if tm.sortMode == models.SortByStatusReverse {
+		case models.SortByStatusReverse:
 			if tm.tasks[i].Done != tm.tasks[j].Done {
 				return tm.tasks[i].Done
 			}
