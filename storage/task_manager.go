@@ -75,7 +75,7 @@ func (tm *TaskManager) GetCount() int {
 	return len(tm.tasks)
 }
 
-func (tm *TaskManager) Sort() {
+func (tm *TaskManager) Sort() error {
 	comparator := func(i, j int) bool {
 		switch tm.sortMode {
 		case models.SortByStatus:
@@ -91,16 +91,17 @@ func (tm *TaskManager) Sort() {
 	}
 
 	sort.SliceStable(tm.tasks, comparator)
+	return tm.storage.Save(tm.tasks)
 }
 
-func (tm *TaskManager) ToggleSortMode() {
+func (tm *TaskManager) ToggleSortMode() error {
 	if tm.sortMode == models.SortByStatus {
 		tm.sortMode = models.SortByStatusReverse
 	} else {
 		tm.sortMode = models.SortByStatus
 	}
 
-	tm.Sort()
+	return tm.Sort()
 }
 
 func (tm *TaskManager) GetSortMode() models.SortMode {

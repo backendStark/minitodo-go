@@ -96,7 +96,10 @@ func handleKeyPress(m *model, key string) (tea.Model, tea.Cmd) {
 		}
 	case keySort:
 		if m.IsNotOnInputField() {
-			m.taskManager.ToggleSortMode()
+			if err := m.taskManager.ToggleSortMode(); err != nil {
+				m.err = err
+				return *m, nil
+			}
 			m.cursor = 0
 			m.updateInputFocus()
 		}
